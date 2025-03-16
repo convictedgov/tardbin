@@ -56,15 +56,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     if (paste.isPrivate) {
-      if (!paste.password) {
-        if (!req.isAuthenticated() || req.user!.id !== paste.userId) {
-          return res.status(403).send("Forbidden");
+      // If paste requires password
+      if (paste.password) {
+        const suppliedPassword = req.query.password as string | undefined;
+        if (!suppliedPassword || suppliedPassword !== paste.password) {
+          return res.status(403).send("Password required");
         }
-      } else {
-        const password = req.query.password;
-        if (password !== paste.password) {
-          return res.status(403).send("Invalid password");
-        }
+      } 
+      // If paste is private but doesn't have password, check user ownership
+      else if (!req.isAuthenticated() || req.user!.id !== paste.userId) {
+        return res.status(403).send("Forbidden");
       }
     }
 
