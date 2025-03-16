@@ -13,18 +13,23 @@ async function hashPassword(password: string) {
   return `${buf.toString("hex")}.${salt}`;
 }
 
+const STORAGE_KEYS = {
+  USERS: 'paste_users',
+  PASTES: 'paste_pastes',
+  USER_ID: 'paste_current_user_id',
+  PASTE_ID: 'paste_current_paste_id'
+};
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
-
   createPaste(paste: InsertPaste & { userId: number }): Promise<Paste>;
   getPaste(urlId: string): Promise<Paste | undefined>;
   getPinnedPastes(): Promise<Paste[]>;
   getRecentPastes(limit: number): Promise<Paste[]>;
   setPastePinned(id: number, isPinned: boolean): Promise<void>;
-
   sessionStore: session.Store;
 }
 
@@ -36,14 +41,31 @@ export class MemStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.pastes = new Map();
-    this.currentUserId = 1;
-    this.currentPasteId = 1;
+    // Load data from localStorage if available
+    const savedUsers = globalThis.localStorage?.getItem(STORAGE_KEYS.USERS);
+    const savedPastes = globalThis.localStorage?.getItem(STORAGE_KEYS.PASTES);
+    const savedUserId = globalThis.localStorage?.getItem(STORAGE_KEYS.USER_ID);
+    const savedPasteId = globalThis.localStorage?.getItem(STORAGE_KEYS.PASTE_ID);
+
+    this.users = new Map(savedUsers ? JSON.parse(savedUsers) : []);
+    this.pastes = new Map(savedPastes ? JSON.parse(savedPastes) : []);
+    this.currentUserId = savedUserId ? parseInt(savedUserId) : 1;
+    this.currentPasteId = savedPasteId ? parseInt(savedPasteId) : 1;
     this.sessionStore = new MemoryStore({ checkPeriod: 86400000 });
 
-    // Create default admin users with properly hashed passwords
-    this.initializeAdminUsers();
+    // Initialize admin users if no users exist
+    if (this.users.size === 0) {
+      this.initializeAdminUsers();
+    }
+  }
+
+  private saveToLocalStorage() {
+    if (!globalThis.localStorage) return;
+
+    globalThis.localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(Array.from(this.users.entries())));
+    globalThis.localStorage.setItem(STORAGE_KEYS.PASTES, JSON.stringify(Array.from(this.pastes.entries())));
+    globalThis.localStorage.setItem(STORAGE_KEYS.USER_ID, this.currentUserId.toString());
+    globalThis.localStorage.setItem(STORAGE_KEYS.PASTE_ID, this.currentPasteId.toString());
   }
 
   private async initializeAdminUsers() {
@@ -60,6 +82,8 @@ export class MemStorage implements IStorage {
       password: await hashPassword("*BTirebeg6wG&^Bge^&G9nie^Gb"),
     });
     this.users.set(victimUser.id, { ...victimUser, isAdmin: true });
+
+    this.saveToLocalStorage();
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -81,6 +105,7 @@ export class MemStorage implements IStorage {
       avatarUrl: null
     };
     this.users.set(id, user);
+    this.saveToLocalStorage();
     return user;
   }
 
@@ -103,6 +128,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
     };
     this.pastes.set(id, newPaste);
+    this.saveToLocalStorage();
     return newPaste;
   }
 
@@ -129,6 +155,7 @@ export class MemStorage implements IStorage {
     const paste = this.pastes.get(id);
     if (paste) {
       this.pastes.set(id, { ...paste, isPinned });
+      this.saveToLocalStorage();
     }
   }
 }

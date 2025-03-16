@@ -10,16 +10,19 @@ import UsersPage from "@/pages/users-page";
 import TermsPage from "@/pages/terms-page";
 import NotFound from "@/pages/not-found";
 import Navbar from "@/components/navbar";
+import { useAuth } from "@/hooks/use-auth";
 
-function Router() {
+function AppContent() {
+  const { user } = useAuth();
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      {user && <Navbar />}
       <Switch>
-        <ProtectedRoute path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
+        <ProtectedRoute path="/" component={HomePage} />
         <ProtectedRoute path="/users" component={UsersPage} />
-        <Route path="/terms" component={TermsPage} />
+        <ProtectedRoute path="/terms" component={TermsPage} />
         <Route component={NotFound} />
       </Switch>
     </div>
@@ -30,7 +33,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
+        <AppContent />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>

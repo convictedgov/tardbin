@@ -7,19 +7,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, User, LogOut } from "lucide-react";
+import { Plus, User, LogOut, Code2 } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import CreatePaste from "./create-paste";
 
 export default function Navbar() {
   const { user, logoutMutation } = useAuth();
 
+  if (!user) return null;
+
   return (
-    <nav className="border-b">
+    <nav className="border-b bg-card">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link href="/">
-            <a className="text-xl font-bold">Paste</a>
+            <a className="flex items-center space-x-2 text-xl font-bold">
+              <Code2 className="h-6 w-6" />
+              <span>Paste</span>
+            </a>
           </Link>
           <div className="hidden md:flex space-x-4">
             <Link href="/terms">
