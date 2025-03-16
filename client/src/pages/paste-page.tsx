@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useParams } from "wouter";
 
 export default function PastePage() {
-  const { id } = useParams<{ id: string }>();
-  
+  const { urlId } = useParams<{ urlId: string }>();
+
   const { data: paste } = useQuery<Paste>({
-    queryKey: [`/api/pastes/${id}`],
+    queryKey: [`/api/pastes/${urlId}`],
   });
 
   if (!paste) return null;

@@ -22,7 +22,7 @@ function AppContent() {
       <Switch>
         <Route path="/auth" component={AuthPage} />
         <ProtectedRoute path="/" component={HomePage} />
-        <ProtectedRoute path="/p/:id" component={PastePage} />
+        <ProtectedRoute path="/p/:urlId" component={PastePage} />
         <ProtectedRoute path="/users" component={UsersPage} />
         <ProtectedRoute path="/terms" component={TermsPage} />
         <Route component={NotFound} />
