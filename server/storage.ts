@@ -9,13 +9,6 @@ import path from "path";
 const MemoryStore = createMemoryStore(session);
 const scryptAsync = promisify(scrypt);
 
-const STORAGE_KEYS = {
-  USERS: 'paste_users',
-  PASTES: 'paste_pastes',
-  USER_ID: 'paste_current_user_id',
-  PASTE_ID: 'paste_current_paste_id'
-};
-
 const STORAGE_DIR = "./.data";
 const USERS_FILE = path.join(STORAGE_DIR, "users.json");
 const PASTES_DIR = path.join(STORAGE_DIR, "pastes");
@@ -58,14 +51,22 @@ export class MemStorage implements IStorage {
     // Create storage directory if it doesn't exist
     fs.mkdir(STORAGE_DIR, { recursive: true })
       .then(() => fs.mkdir(PASTES_DIR, { recursive: true }))
-      .then(() => this.loadData())
+      .then(() => {
+        console.log("[Storage] Created storage directories");
+        return this.loadData();
+      })
       .then(() => {
         // Initialize admin users if no users exist
         if (this.users.size === 0) {
+          console.log("[Storage] No users found, initializing admin users");
           this.initializeAdminUsers();
+        } else {
+          console.log(`[Storage] Loaded ${this.users.size} users and ${this.pastes.size} pastes`);
         }
       })
-      .catch(console.error);
+      .catch(err => {
+        console.error("[Storage] Error initializing storage:", err);
+      });
   }
 
   private async loadData() {
@@ -73,9 +74,10 @@ export class MemStorage implements IStorage {
       const usersData = await fs.readFile(USERS_FILE, 'utf-8');
       const users = JSON.parse(usersData);
       this.users = new Map(users.map((user: User) => [user.id, user]));
-      this.currentUserId = Math.max(...Array.from(this.users.keys())) + 1;
+      this.currentUserId = Math.max(...Array.from(this.users.keys()), 0) + 1;
+      console.log(`[Storage] Loaded ${this.users.size} users from ${USERS_FILE}`);
     } catch (err) {
-      // File doesn't exist yet, that's fine
+      console.log("[Storage] No existing users file found, starting fresh");
     }
 
     try {
@@ -88,36 +90,37 @@ export class MemStorage implements IStorage {
           this.currentPasteId = Math.max(this.currentPasteId, paste.id + 1);
         }
       }
+      console.log(`[Storage] Loaded ${this.pastes.size} pastes from ${PASTES_DIR}`);
     } catch (err) {
-      // Directory might be empty, that's fine
+      console.log("[Storage] No existing pastes found, starting fresh");
     }
   }
 
   private async saveUser(user: User) {
     this.users.set(user.id, user);
     await fs.writeFile(USERS_FILE, JSON.stringify(Array.from(this.users.values()), null, 2));
+    console.log(`[Storage] Saved user ${user.username} (ID: ${user.id})`);
   }
 
   private async savePaste(paste: Paste) {
     this.pastes.set(paste.id, paste);
-    await fs.writeFile(
-      path.join(PASTES_DIR, `${paste.urlId}.json`),
-      JSON.stringify(paste, null, 2)
-    );
+    const filePath = path.join(PASTES_DIR, `${paste.urlId}.json`);
+    await fs.writeFile(filePath, JSON.stringify(paste, null, 2));
+    console.log(`[Storage] Saved paste ${paste.title} (ID: ${paste.id}, URL: ${paste.urlId})`);
   }
 
   private async initializeAdminUsers() {
     // Create convicted admin
     const convictedUser = await this.createUser({
       username: "convicted",
-      password: await hashPassword("wbetr87witb46btbz87tb7i6t4wbab4687ab$^Rv7IBwt*"),
+      password: "wbetr87witb46btbz87tb7i6t4wbab4687ab$^Rv7IBwt*",
     });
     await this.updateUser(convictedUser.id, { isAdmin: true });
 
     // Create victim admin
     const victimUser = await this.createUser({
       username: "victim",
-      password: await hashPassword("*BTirebeg6wG&^Bge^&G9nie^Gb"),
+      password: "*BTirebeg6wG&^Bge^&G9nie^Gb",
     });
     await this.updateUser(victimUser.id, { isAdmin: true });
   }
@@ -138,7 +141,8 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id, 
       isAdmin: false,
-      avatarUrl: null
+      avatarUrl: null,
+      password: await hashPassword(insertUser.password)
     };
     await this.saveUser(user);
     return user;
@@ -157,6 +161,7 @@ export class MemStorage implements IStorage {
   async deleteUser(id: number): Promise<void> {
     this.users.delete(id);
     await fs.writeFile(USERS_FILE, JSON.stringify(Array.from(this.users.values()), null, 2));
+    console.log(`[Storage] Deleted user ${id}`);
   }
 
   async getAllUsers(): Promise<User[]> {
