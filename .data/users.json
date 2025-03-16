@@ -1,0 +1,16 @@
+[
+  {
+    "username": "convicted",
+    "password": "302f795e414e64ab5d3f0a66c4e7231bc3a2dfc8ed9b7d9a2518f66b24aaf19bed2d7a95a0c362a890b30bc6697df7981ae08459f0c031e53125a18ee6c5d583.f04b438fc750cbacead30a2c3303fcc0",
+    "id": 1,
+    "isAdmin": true,
+    "avatarUrl": null
+  },
+  {
+    "username": "victim",
+    "password": "ed11c47482f20a674ec8c02ed59bb57d0d7e75d916952e90b82b5450251c2c3d2cc5beffdffc9e218c019bcba6044698a0759feee8778e161277b3a3d441b65f.20245064bc7ea729ffe672de93367f68",
+    "id": 2,
+    "isAdmin": true,
+    "avatarUrl": null
+  }
+]

@@ -26,6 +26,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(users);
   });
 
+  app.delete("/api/users/:id", ensureAdmin, async (req, res) => {
+    await storage.deleteUser(parseInt(req.params.id));
+    res.sendStatus(200);
+  });
+
+  app.patch("/api/users/:id", ensureAuthenticated, async (req, res) => {
+    const userId = parseInt(req.params.id);
+
+    // Only admins can change admin status or modify other users
+    if ((req.body.isAdmin !== undefined || userId !== req.user!.id) && !req.user!.isAdmin) {
+      return res.status(403).send("Forbidden");
+    }
+
+    await storage.updateUser(userId, req.body);
+    const updatedUser = await storage.getUser(userId);
+    res.json(updatedUser);
+  });
+
   app.post("/api/pastes", ensureAuthenticated, async (req, res) => {
     const result = insertPasteSchema.safeParse(req.body);
     if (!result.success) {
