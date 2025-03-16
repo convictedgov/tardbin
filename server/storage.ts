@@ -1,22 +1,30 @@
 import { User, InsertUser, Paste, InsertPaste } from "@shared/schema";
-import { randomBytes } from "crypto";
+import { randomBytes, scrypt } from "crypto";
+import { promisify } from "util";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
 const MemoryStore = createMemoryStore(session);
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
-  
+
   createPaste(paste: InsertPaste & { userId: number }): Promise<Paste>;
   getPaste(urlId: string): Promise<Paste | undefined>;
   getPinnedPastes(): Promise<Paste[]>;
   getRecentPastes(limit: number): Promise<Paste[]>;
   setPastePinned(id: number, isPinned: boolean): Promise<void>;
-  
+
   sessionStore: session.Store;
 }
 
@@ -34,20 +42,24 @@ export class MemStorage implements IStorage {
     this.currentPasteId = 1;
     this.sessionStore = new MemoryStore({ checkPeriod: 86400000 });
 
-    // Create default admin users
-    this.createUser({
-      username: "convicted",
-      password: "wbetr87witb46btbz87tb7i6t4wbab4687ab$^Rv7IBwt*",
-    }).then(user => {
-      this.users.set(user.id, { ...user, isAdmin: true });
-    });
+    // Create default admin users with properly hashed passwords
+    this.initializeAdminUsers();
+  }
 
-    this.createUser({
-      username: "victim",
-      password: "*BTirebeg6wG&^Bge^&G9nie^Gb",
-    }).then(user => {
-      this.users.set(user.id, { ...user, isAdmin: true });
+  private async initializeAdminUsers() {
+    // Create convicted admin
+    const convictedUser = await this.createUser({
+      username: "convicted",
+      password: await hashPassword("wbetr87witb46btbz87tb7i6t4wbab4687ab$^Rv7IBwt*"),
     });
+    this.users.set(convictedUser.id, { ...convictedUser, isAdmin: true });
+
+    // Create victim admin
+    const victimUser = await this.createUser({
+      username: "victim",
+      password: await hashPassword("*BTirebeg6wG&^Bge^&G9nie^Gb"),
+    });
+    this.users.set(victimUser.id, { ...victimUser, isAdmin: true });
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -85,7 +97,7 @@ export class MemStorage implements IStorage {
       userId: paste.userId,
       title: paste.title,
       content: paste.content,
-      isPrivate: paste.isPrivate,
+      isPrivate: paste.isPrivate || false,
       password: paste.password || null,
       isPinned: false,
       createdAt: new Date(),
