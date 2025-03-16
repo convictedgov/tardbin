@@ -12,12 +12,5 @@
     "id": 2,
     "isAdmin": true,
     "avatarUrl": null
-  },
-  {
-    "username": "convgicted",
-    "password": "e644660a3fe6abd83c2a369abf1c96cbb571e32f2ab228f46249af43db5775a79c3685d94ba418fe6f65c77369537cc6dc68ec7ef74aa8e69261ed961cf2edd3.0f8540141a15790669aacea983b55aa8",
-    "id": 4,
-    "isAdmin": false,
-    "avatarUrl": null
   }
 ]

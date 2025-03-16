@@ -27,12 +27,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/users/:id", ensureAdmin, async (req, res) => {
-    await storage.deleteUser(parseInt(req.params.id));
+    const userId = parseInt(req.params.id);
+    const user = await storage.getUser(userId);
+
+    // Protect special users
+    if (user && ["victim", "convicted"].includes(user.username)) {
+      return res.status(403).send("Cannot delete protected users");
+    }
+
+    await storage.deleteUser(userId);
     res.sendStatus(200);
   });
 
   app.patch("/api/users/:id", ensureAuthenticated, async (req, res) => {
     const userId = parseInt(req.params.id);
+    const user = await storage.getUser(userId);
+
+    // Protect special users
+    if (user && ["victim", "convicted"].includes(user.username)) {
+      return res.status(403).send("Cannot modify protected users");
+    }
 
     // Only admins can change admin status or modify other users
     if ((req.body.isAdmin !== undefined || userId !== req.user!.id) && !req.user!.isAdmin) {
@@ -92,6 +106,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/pastes/:id/pin", ensureAdmin, async (req, res) => {
     await storage.setPastePinned(parseInt(req.params.id), req.body.isPinned);
+    res.sendStatus(200);
+  });
+
+  app.delete("/api/pastes/:id", ensureAdmin, async (req, res) => {
+    await storage.deletePaste(parseInt(req.params.id));
     res.sendStatus(200);
   });
 

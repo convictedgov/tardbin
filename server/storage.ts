@@ -32,6 +32,7 @@ export interface IStorage {
   getRecentPastes(limit: number): Promise<Paste[]>;
   setPastePinned(id: number, isPinned: boolean): Promise<void>;
   sessionStore: session.Store;
+  deletePaste(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -210,6 +211,15 @@ export class MemStorage implements IStorage {
     if (paste) {
       paste.isPinned = isPinned;
       await this.savePaste(paste);
+    }
+  }
+  async deletePaste(id: number): Promise<void> {
+    const paste = this.pastes.get(id);
+    if (paste) {
+      this.pastes.delete(id);
+      const filePath = path.join(PASTES_DIR, `${paste.urlId}.json`);
+      await fs.unlink(filePath);
+      console.log(`[Storage] Deleted paste ${id}`);
     }
   }
 }

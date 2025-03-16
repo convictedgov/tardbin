@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { type User } from "@shared/schema";
+import { type User, type Paste } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ export default function AdminPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [newPassword, setNewPassword] = useState("");
-  const [newAdmin, setNewAdmin] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (!user?.isAdmin) {
     return <Redirect to="/" />;
@@ -47,11 +47,16 @@ export default function AdminPage() {
         description: "User has been successfully updated",
       });
       setNewPassword("");
-      setNewAdmin("");
     },
   });
 
   if (!users) return null;
+
+  const filteredUsers = users.filter(u => 
+    u.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const isProtectedUser = (username: string) => ["victim", "convicted"].includes(username);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -60,8 +65,15 @@ export default function AdminPage() {
           <CardTitle>Admin Panel</CardTitle>
         </CardHeader>
         <CardContent>
+          <Input
+            type="text"
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="mb-6"
+          />
           <div className="space-y-6">
-            {users.map((u) => (
+            {filteredUsers.map((u) => (
               <div key={u.id} className="bg-card p-4 border border-border">
                 <div className="flex items-center justify-between">
                   <div>
@@ -71,40 +83,44 @@ export default function AdminPage() {
                     </p>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <Input
-                      type="password"
-                      placeholder="New password"
-                      className="w-48"
-                      value={u.id === parseInt(newPassword.split(":")[0]) ? newPassword.split(":")[1] : ""}
-                      onChange={(e) => setNewPassword(`${u.id}:${e.target.value}`)}
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        if (newPassword.startsWith(`${u.id}:`)) {
-                          updateUserMutation.mutate({
-                            userId: u.id,
-                            password: newPassword.split(":")[1],
-                          });
-                        }
-                      }}
-                      disabled={!newPassword.startsWith(`${u.id}:`)}
-                    >
-                      Change Password
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => updateUserMutation.mutate({ userId: u.id, isAdmin: !u.isAdmin })}
-                    >
-                      {u.isAdmin ? "Remove Admin" : "Make Admin"}
-                    </Button>
-                    {u.id !== user.id && (
-                      <Button
-                        variant="destructive"
-                        onClick={() => deleteUserMutation.mutate(u.id)}
-                      >
-                        Delete
-                      </Button>
+                    {!isProtectedUser(u.username) && (
+                      <>
+                        <Input
+                          type="password"
+                          placeholder="New password"
+                          className="w-48"
+                          value={u.id === parseInt(newPassword.split(":")[0]) ? newPassword.split(":")[1] : ""}
+                          onChange={(e) => setNewPassword(`${u.id}:${e.target.value}`)}
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            if (newPassword.startsWith(`${u.id}:`)) {
+                              updateUserMutation.mutate({
+                                userId: u.id,
+                                password: newPassword.split(":")[1],
+                              });
+                            }
+                          }}
+                          disabled={!newPassword.startsWith(`${u.id}:`)}
+                        >
+                          Change Password
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => updateUserMutation.mutate({ userId: u.id, isAdmin: !u.isAdmin })}
+                        >
+                          {u.isAdmin ? "Remove Admin" : "Make Admin"}
+                        </Button>
+                        {u.id !== user.id && (
+                          <Button
+                            variant="destructive"
+                            onClick={() => deleteUserMutation.mutate(u.id)}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
