@@ -19,7 +19,7 @@ export default function UsersPage() {
       <div>
         <h2 className="text-2xl font-bold mb-4 flex items-center">
           <Crown className="h-6 w-6 mr-2 text-yellow-500" />
-          Administrators
+          admins
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {admins.map((user) => (
@@ -42,7 +42,7 @@ export default function UsersPage() {
       <div>
         <h2 className="text-2xl font-bold mb-4 flex items-center">
           <UserIcon className="h-6 w-6 mr-2" />
-          Users
+          users
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {regularUsers.map((user) => (

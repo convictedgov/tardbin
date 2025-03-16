@@ -12,5 +12,12 @@
     "id": 2,
     "isAdmin": true,
     "avatarUrl": null
+  },
+  {
+    "username": "bible",
+    "password": "073a71095826febd8110369e4f6729595c87410d8fc776b524196a892444dc2dfb31721c2eefdfc7438862b172d7586eecd35bf5fd8c09d70a5911ebf5526ca1.c55e07eef2bd6761df54040e0623989d",
+    "id": 3,
+    "isAdmin": false,
+    "avatarUrl": null
   }
 ]

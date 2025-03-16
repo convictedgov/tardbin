@@ -21,18 +21,18 @@ export default function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link href="/">
-            <a className="font-mono text-xl font-bold tracking-tighter">TARDBIN</a>
+            <a className="font-mono text-xl font-bold tracking-tighter">tardbin</a>
           </Link>
           <div className="hidden md:flex space-x-6">
             <Link href="/terms">
-              <a className="text-muted-foreground hover:text-foreground transition-colors">Terms</a>
+              <a className="text-muted-foreground hover:text-foreground transition-colors">terms</a>
             </Link>
             <Link href="/users">
-              <a className="text-muted-foreground hover:text-foreground transition-colors">Users</a>
+              <a className="text-muted-foreground hover:text-foreground transition-colors">users</a>
             </Link>
             {user.isAdmin && (
               <Link href="/admin">
-                <a className="text-muted-foreground hover:text-foreground transition-colors">Admin</a>
+                <a className="text-muted-foreground hover:text-foreground transition-colors">admin panel</a>
               </Link>
             )}
           </div>
@@ -43,7 +43,7 @@ export default function Navbar() {
             <DialogTrigger asChild>
               <Button variant="outline" className="border-border">
                 <Plus className="h-4 w-4 mr-2" />
-                New Paste
+                new paste
               </Button>
             </DialogTrigger>
             <CreatePaste />
@@ -61,13 +61,13 @@ export default function Navbar() {
                 <Link href="/settings">
                   <a className="flex items-center">
                     <Settings className="h-4 w-4 mr-2" />
-                    Settings
+                    settings
                   </a>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

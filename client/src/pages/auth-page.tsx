@@ -29,7 +29,7 @@ export default function AuthPage() {
       <div className="flex items-center justify-center p-8">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Welcome to Paste</CardTitle>
+            <CardTitle>tardbin</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
@@ -115,8 +115,8 @@ export default function AuthPage() {
       </div>
       <div className="hidden md:flex items-center justify-center bg-primary p-8">
         <div className="text-primary-foreground max-w-md">
-          <h1 className="text-4xl font-bold mb-4">Share Code Snippets Easily</h1>
-          <p className="text-lg opacity-90">Create and share code snippets with privacy options, password protection, and more.</p>
+          <h1 className="text-4xl font-bold mb-4">send doxs and pastes anywhere Securely.</h1>
+          <p className="text-lg opacity-90">use us for your doxing needs or just pastes</p>
         </div>
       </div>
     </div>

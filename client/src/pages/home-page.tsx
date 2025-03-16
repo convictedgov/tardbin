@@ -18,7 +18,7 @@ export default function HomePage() {
    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝
 `}
         </pre>
-        <p className="text-muted-foreground mt-4 font-mono">Share code snippets securely</p>
+        <p className="text-muted-foreground mt-4 font-mono">dox people or just paste</p>
       </div>
 
       <div className="max-w-xl mx-auto mb-8">
