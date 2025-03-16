@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, User, LogOut, Code2 } from "lucide-react";
+import { Plus, User, LogOut } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import CreatePaste from "./create-paste";
 
@@ -17,21 +17,18 @@ export default function Navbar() {
   if (!user) return null;
 
   return (
-    <nav className="border-b bg-card">
+    <nav className="border-b border-border bg-background">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link href="/">
-            <a className="flex items-center space-x-2 text-xl font-bold">
-              <Code2 className="h-6 w-6" />
-              <span>Paste</span>
-            </a>
+            <a className="font-mono text-xl font-bold tracking-tighter">PASTE</a>
           </Link>
-          <div className="hidden md:flex space-x-4">
+          <div className="hidden md:flex space-x-6">
             <Link href="/terms">
-              <a className="text-muted-foreground hover:text-foreground">Terms</a>
+              <a className="text-muted-foreground hover:text-foreground transition-colors">Terms</a>
             </Link>
             <Link href="/users">
-              <a className="text-muted-foreground hover:text-foreground">Users</a>
+              <a className="text-muted-foreground hover:text-foreground transition-colors">Users</a>
             </Link>
           </div>
         </div>
@@ -39,7 +36,7 @@ export default function Navbar() {
         <div className="flex items-center space-x-4">
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button variant="outline" className="border-border">
                 <Plus className="h-4 w-4 mr-2" />
                 New Paste
               </Button>
@@ -49,7 +46,7 @@ export default function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="border-border">
                 <User className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

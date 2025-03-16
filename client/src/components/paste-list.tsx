@@ -9,7 +9,7 @@ import { Pin, PinOff } from "lucide-react";
 
 export function PasteCard({ paste }: { paste: Paste }) {
   const { user } = useAuth();
-  
+
   const pinMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", `/api/pastes/${paste.id}/pin`, {
@@ -23,15 +23,16 @@ export function PasteCard({ paste }: { paste: Paste }) {
   });
 
   return (
-    <Card>
+    <Card className="bg-card border-border hover:bg-secondary transition-colors">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg">{paste.title}</CardTitle>
+        <CardTitle className="text-lg font-mono">{paste.title}</CardTitle>
         {user?.isAdmin && (
           <Button
             variant="ghost"
             size="icon"
             onClick={() => pinMutation.mutate()}
             disabled={pinMutation.isPending}
+            className="hover:bg-background"
           >
             {paste.isPinned ? (
               <PinOff className="h-4 w-4" />
@@ -42,7 +43,7 @@ export function PasteCard({ paste }: { paste: Paste }) {
         )}
       </CardHeader>
       <CardContent>
-        <pre className="text-sm overflow-x-auto">
+        <pre className="text-sm overflow-x-auto bg-background border-border">
           {paste.content.slice(0, 200)}
           {paste.content.length > 200 && "..."}
         </pre>
@@ -60,7 +61,7 @@ export function PinnedPastes() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Pinned Pastes</h2>
+      <h2 className="text-2xl font-bold font-mono">Pinned Pastes</h2>
       <div className="grid gap-4 md:grid-cols-2">
         {pastes.map((paste) => (
           <PasteCard key={paste.id} paste={paste} />
@@ -79,7 +80,7 @@ export function RecentPastes() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Recent Pastes</h2>
+      <h2 className="text-2xl font-bold font-mono">Recent Pastes</h2>
       <div className="grid gap-4 md:grid-cols-2">
         {pastes.map((paste) => (
           <PasteCard key={paste.id} paste={paste} />
