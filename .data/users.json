@@ -1,23 +1,9 @@
 [
   {
-    "username": "convicted",
-    "password": "302f795e414e64ab5d3f0a66c4e7231bc3a2dfc8ed9b7d9a2518f66b24aaf19bed2d7a95a0c362a890b30bc6697df7981ae08459f0c031e53125a18ee6c5d583.f04b438fc750cbacead30a2c3303fcc0",
+    "username": "dexter",
+    "password": "cc3860de119de44105b0e289b68bd47763d6933c712c8a9eb04126911305bbc043468c4275ecf3dc97f9474b20d11ce4e030c13793200d7565c29559a8eb47b9.7f14b7a7e2e94a2ab29970df6d3d171e",
     "id": 1,
     "isAdmin": true,
-    "avatarUrl": null
-  },
-  {
-    "username": "victim",
-    "password": "ed11c47482f20a674ec8c02ed59bb57d0d7e75d916952e90b82b5450251c2c3d2cc5beffdffc9e218c019bcba6044698a0759feee8778e161277b3a3d441b65f.20245064bc7ea729ffe672de93367f68",
-    "id": 2,
-    "isAdmin": true,
-    "avatarUrl": null
-  },
-  {
-    "username": "bible",
-    "password": "073a71095826febd8110369e4f6729595c87410d8fc776b524196a892444dc2dfb31721c2eefdfc7438862b172d7586eecd35bf5fd8c09d70a5911ebf5526ca1.c55e07eef2bd6761df54040e0623989d",
-    "id": 3,
-    "isAdmin": false,
-    "avatarUrl": null
+    "avatarUrl": "https://cdn.discordapp.com/avatars/1375643983400669234/edcba170a7225bbef6fdc41bdf6115fc.webp?size=1024"
   }
 ]

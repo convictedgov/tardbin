@@ -39,6 +39,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center space-x-4">
+
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" className="border-border">
@@ -48,6 +49,14 @@ export default function Navbar() {
             </DialogTrigger>
             <CreatePaste />
           </Dialog>
+
+          <Link href="/my-pastes">
+            <a>
+              <Button variant="outline" className="border-border ml-2">
+                my pastes
+              </Button>
+            </a>
+          </Link>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

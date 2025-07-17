@@ -1,4 +1,6 @@
 import { User, InsertUser, Paste, InsertPaste } from "@shared/schema";
+// Extend Paste type to include comments
+export type PasteWithComments = Paste & { comments?: Array<{ userId: number | null, text: string, createdAt: string }> };
 import { randomBytes, scrypt } from "crypto";
 import { promisify } from "util";
 import session from "express-session";
@@ -20,6 +22,9 @@ async function hashPassword(password: string) {
 }
 
 export interface IStorage {
+  getUserPastes(userId: number): Promise<Paste[]>;
+  addCommentToPaste(urlId: string, comment: { userId: number | null, text: string }): Promise<void>;
+  getPasteComments(urlId: string): Promise<Array<{ userId: number | null, text: string, createdAt: string }>>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -36,6 +41,26 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  async getUserPastes(userId: number): Promise<Paste[]> {
+    return Array.from(this.pastes.values()).filter(paste => paste.userId === userId);
+  }
+  async addCommentToPaste(urlId: string, comment: { userId: number | null, text: string }): Promise<void> {
+    const paste = await this.getPaste(urlId);
+    if (!paste) throw new Error("Paste not found");
+    const pasteWithComments = paste as PasteWithComments;
+    if (!pasteWithComments.comments) pasteWithComments.comments = [];
+    pasteWithComments.comments.push({ ...comment, createdAt: new Date().toISOString() });
+    await this.savePaste(pasteWithComments);
+  }
+
+  async getPasteComments(urlId: string): Promise<Array<{ userId: number | null, text: string, createdAt: string }>> {
+    const paste = await this.getPaste(urlId);
+    const pasteWithComments = paste as PasteWithComments;
+    return pasteWithComments?.comments || [];
+  }
+  async getAllPastes(): Promise<Paste[]> {
+    return Array.from(this.pastes.values());
+  }
   private users: Map<number, User>;
   private pastes: Map<number, Paste>;
   private currentUserId: number;
@@ -59,8 +84,7 @@ export class MemStorage implements IStorage {
       .then(() => {
         // Initialize admin users if no users exist
         if (this.users.size === 0) {
-          console.log("[Storage] No users found, initializing admin users");
-          this.initializeAdminUsers();
+          console.log("[Storage] No users found.");
         } else {
           console.log(`[Storage] Loaded ${this.users.size} users and ${this.pastes.size} pastes`);
         }
@@ -110,21 +134,6 @@ export class MemStorage implements IStorage {
     console.log(`[Storage] Saved paste ${paste.title} (ID: ${paste.id}, URL: ${paste.urlId})`);
   }
 
-  private async initializeAdminUsers() {
-    // Create convicted admin
-    const convictedUser = await this.createUser({
-      username: "convicted",
-      password: "wbetr87witb46btbz87tb7i6t4wbab4687ab$^Rv7IBwt*",
-    });
-    await this.updateUser(convictedUser.id, { isAdmin: true });
-
-    // Create victim admin
-    const victimUser = await this.createUser({
-      username: "victim",
-      password: "*BTirebeg6wG&^Bge^&G9nie^Gb",
-    });
-    await this.updateUser(victimUser.id, { isAdmin: true });
-  }
 
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
@@ -172,7 +181,7 @@ export class MemStorage implements IStorage {
   async createPaste(paste: InsertPaste & { userId: number }): Promise<Paste> {
     const id = this.currentPasteId++;
     const urlId = randomBytes(6).toString('hex');
-    const newPaste: Paste = {
+    const newPaste: PasteWithComments = {
       id,
       urlId,
       userId: paste.userId,
@@ -182,6 +191,7 @@ export class MemStorage implements IStorage {
       password: paste.password || null,
       isPinned: false,
       createdAt: new Date(),
+      comments: [],
     };
     await this.savePaste(newPaste);
     return newPaste;
@@ -196,12 +206,16 @@ export class MemStorage implements IStorage {
   async getPinnedPastes(): Promise<Paste[]> {
     return Array.from(this.pastes.values())
       .filter(paste => paste.isPinned)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => {
+        const aDate = typeof a.createdAt === 'string' ? new Date(a.createdAt) : a.createdAt;
+        const bDate = typeof b.createdAt === 'string' ? new Date(b.createdAt) : b.createdAt;
+        return bDate.getTime() - aDate.getTime();
+      });
   }
 
   async getRecentPastes(limit: number): Promise<Paste[]> {
     return Array.from(this.pastes.values())
-      .filter(paste => !paste.isPrivate)
+      .filter(paste => !paste.isPrivate && !paste.isPinned)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
   }

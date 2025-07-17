@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 import HomePage from "@/pages/home-page";
+import UserPastesPage from "@/pages/user-pastes";
+import PublicPasteList from "@/pages/public-paste-list";
 import AuthPage from "@/pages/auth-page";
 import UsersPage from "@/pages/users-page";
 import TermsPage from "@/pages/terms-page";
@@ -23,12 +25,14 @@ function AppContent() {
       {user && <Navbar />}
       <Switch>
         <Route path="/auth" component={AuthPage} />
-        <ProtectedRoute path="/" component={HomePage} />
-        <ProtectedRoute path="/p/:urlId" component={PastePage} />
-        <ProtectedRoute path="/users" component={UsersPage} />
-        <ProtectedRoute path="/terms" component={TermsPage} />
-        <ProtectedRoute path="/settings" component={SettingsPage} />
-        <ProtectedRoute path="/admin" component={AdminPage} />
+        <ProtectedRoute path="/" component={() => <HomePage />} />
+        <Route path="/p/:urlId" component={PastePage} />
+        <Route path="/p" component={PublicPasteList} />
+        <ProtectedRoute path="/users" component={() => <UsersPage />} />
+        <ProtectedRoute path="/my-pastes" component={() => <UserPastesPage />} />
+        <ProtectedRoute path="/terms" component={() => <TermsPage />} />
+        <ProtectedRoute path="/settings" component={() => <SettingsPage />} />
+        <ProtectedRoute path="/admin" component={() => <AdminPage />} />
         <Route component={NotFound} />
       </Switch>
     </div>
